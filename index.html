@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Height Measurement Data Record</title>
+</head>
+<body>
+    <div class="container">
+        <div id="connect-bluetooth" style="display: none;">
+            <h1>Connect To Bluetooth</h1>
+            <button type="button" id="connectButton">Connect to Bluetooth</button>
+        </div>
+        <div id="sheet-url" style="display: block;">
+            <h1>Enter Google Sheet link</h1>
+            <form>
+                <input type="text" name="sheet-link" id="sheet-link" placeholder="https://docs.google.com/spreadsheets/d/..">
+                <button type="button"id="sheet-connection">Submit</button>
+                <a href="" style="text-decoration: none; color: rgb(0, 0, 0); font-size: 15px; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">✅ read documentation</a>
+            </form>
+        </div>
+        <div id="data-insertion" style="display: block;">
+            <form id="form">
+                <h1>Data Submission Form</h1>
+                <h3 id="data-received">xxx</h3>
+                <input type="text" name="name" id="details-0" placeholder=" saya suka"><br>
+                <input type="text" name="name" id="details-1" placeholder=" "><br>
+                <input type="text" name="name" id="details-2" placeholder=" "><br>
+                <button type="button" id="submit-button">Submit</button>
+                <button type="button" id="new-sheet-button" style="background-color: white; border: 2px solid #007BFF; color: #007BFF; font-weight: 400;">New Sheet</button>
+            </form>
+            <div id="message" style="text-align: left; display: none;">Waiting For Data Submission</div>
+        </div>        
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
