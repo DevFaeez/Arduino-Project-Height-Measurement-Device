@@ -8,23 +8,24 @@
 </head>
 <body>
     <div class="container">
-        <div id="connect-bluetooth" style="display: none;">
+        <div id="connect-bluetooth" style="display: block;">
             <h1>Connect To Bluetooth</h1>
+            <h2 id="statusOutput"></h2>
             <button type="button" id="connectButton">Connect to Bluetooth</button>
         </div>
-        <div id="sheet-url" style="display: block;">
+        <div id="sheet-url" style="display: none;">
             <h1>Enter Google Sheet link</h1>
             <form>
-                <input type="text" name="sheet-link" id="sheet-link" placeholder="https://docs.google.com/spreadsheets/d/..">
-                <button type="button"id="sheet-connection">Submit</button>
+                <input type="text" name="sheetUrl" id="sheet-link" placeholder="https://docs.google.com/spreadsheets/d/..">
+                <button type="button" id="sheet-connection">Submit</button>
                 <a href="" style="text-decoration: none; color: rgb(0, 0, 0); font-size: 15px; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;">✅ read documentation</a>
             </form>
         </div>
-        <div id="data-insertion" style="display: block;">
+        <div id="data-insertion" style="display: none;">
             <form id="form">
                 <h1>Data Submission Form</h1>
                 <h3 id="data-received">xxx</h3>
-                <input type="text" name="name" id="details-0" placeholder=" saya suka"><br>
+                <input type="text" name="name" id="details-0" placeholder=" saya suka" required><br>
                 <input type="text" name="name" id="details-1" placeholder=" "><br>
                 <input type="text" name="name" id="details-2" placeholder=" "><br>
                 <button type="button" id="submit-button">Submit</button>

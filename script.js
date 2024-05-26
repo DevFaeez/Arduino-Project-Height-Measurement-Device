@@ -1,6 +1,6 @@
 var inputData1;
-var inputData1;
-var inputData1;
+var inputData2;
+var inputData3;
 var height;
 
 var message = document.getElementById("message");
@@ -13,17 +13,23 @@ document.getElementById('connectButton').addEventListener('click', async functio
             optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
         });
 
-        document.getElementById('statusOutput').textContent = 'Device selected, connecting...';
+        document.getElementById('statusOutput').textContent = 'selected device, connecting...';
 
         const server = await device.gatt.connect();
-        document.getElementById('statusOutput').textContent = 'Connected to GATT server';
+        document.getElementById('statusOutput').textContent = 'Connected to bluetooth';
+
+
+        document.getElementById("connect-bluetooth").style.display = "none";
+        document.getElementById("sheet-url").style.display = "block";
+        testConnectionBluetooth();
+
 
         const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
         const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
 
         characteristic.startNotifications();
         characteristic.addEventListener('characteristicvaluechanged', handleCharacteristicValueChanged);
-        document.getElementById('statusOutput').textContent = 'Notifications started, waiting for data...';
+        // document.getElementById('statusOutput').textContent = 'Notifications started, waiting for data...';
 
     } catch (error) {
         console.log('Error: ' + error);
@@ -33,7 +39,7 @@ document.getElementById('connectButton').addEventListener('click', async functio
 
 function handleCharacteristicValueChanged(event) {
     const value = new TextDecoder().decode(event.target.value);
-    height = value.height();
+    height = value.trim();
     document.getElementById('dataOutput').textContent = value.trim() + ' cm';
 }
 
@@ -57,17 +63,27 @@ function renameInputForm() {
 }
 
 
-
 function formSubmit() {
+    // Ensure the form does not perform default submission
+    document.getElementById("data-received").textContent = height;
+    document.getElementById("form").addEventListener("submit", function(event) {
+        event.preventDefault();
+    });
+    
     document.getElementById("submit-button").addEventListener("click", function () {
+        var message = document.getElementById("message");
+        message.style.display = "block";
+        message.style.backgroundColor = "#979797";
+        message.textContent = "Submitting...";
+    
         // Create customer data manually
         var customerData = {
             sheetLink: document.getElementById("sheet-link").value,
             date: new Date().toString(),
-            inputData1: document.getElementById("details-0").value,
-            inputData2: document.getElementById("details-1").value,
-            inputData3: document.getElementById("details-2").value,
-            height: "172cm"
+            [inputData1]: document.getElementById("details-0").value,
+            [inputData2]: document.getElementById("details-1").value,
+            [inputData3]: document.getElementById("details-2").value,
+            height: height
         };
     
         // Construct formDataString
@@ -78,27 +94,30 @@ function formSubmit() {
             }
         }
         var formDataString = keyValuePairs.join("&");
-        console.log(formDataString);
     
         // Send a POST request
         fetch("https://script.google.com/macros/s/AKfycbxMngpdevi3Ey8wXvy-n_yPIiqEdUycRov02n41pyWyJixSEG9Vg3Lcl3cB_gBCRSew/exec", {  // Replace with your deployed Apps Script URL
             method: "POST",
             body: formDataString,
             headers: {
-                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+                "Content-Type": "application/x-www-form-urlencoded"
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.status === 'success') {
                 message.textContent = "Data submitted successfully!";
-                message.style.display = "block";
                 message.style.backgroundColor = "green";
                 message.style.color = "beige";
+                
             } else {
-                throw new Error(data.message);
+                throw new Error(data.message || "Unknown error occurred.");
             }
-            document.getElementById("submit-button").disabled = false;
             document.getElementById("form").reset();
             setTimeout(() => {
                 message.textContent = "";
@@ -106,12 +125,10 @@ function formSubmit() {
             }, 2600);
         })
         .catch(error => {
-            console.error(error);
-            message.textContent = "An error occurred while submitting the form.";
-            message.style.display = "block";
+            console.error('There was a problem with the fetch operation:', error);
+            message.textContent = "An error occurred while submitting the form: " + error.message;
             message.style.backgroundColor = "red";
             message.style.color = "white";
-            document.getElementById("submit-button").disabled = false;
         });
     });
     
@@ -119,35 +136,50 @@ function formSubmit() {
         document.getElementById("form").reset();
     });
     
+    // Other event listeners
+    // document.addEventListener('DOMContentLoaded', function() {
+    //     document.getElementById('sheet-connection').addEventListener('click', function() {
+    //         const sheetLink = document.getElementById('sheet-link').value;
+    //         if (isValidGoogleSheetLink(sheetLink)) {
+    //             document.getElementById("sheet-url").style.display = "none";
+    //             renameInputForm();
+    
+    //             document.getElementById("data-insertion").style.display = "block";
+    //             formSubmit();
+    //         } else {
+    //             alert('Invalid Google Sheet link');
+    //         }
+    //     });
+    
+    //     function isValidGoogleSheetLink(url) {
+    //         const regex = /^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9-_]+(\/.*)?$/;
+    //         return regex.test(url);
+    //     }
+    // });
     
 }
 
-
-
-
-
-document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('sheet-connection').addEventListener('click', function() {
-        const sheetLink = document.getElementById('sheet-link').value;
-        if (isValidGoogleSheetLink(sheetLink)) {
-            document.getElementById("sheet-url").style.display = "none";
-            renameInputForm();
-            
-
-            while (true) {
+function testConnectionBluetooth() {
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('sheet-connection').addEventListener('click', function() {
+            const sheetLink = document.getElementById('sheet-link').value;
+            if (isValidGoogleSheetLink(sheetLink)) {
+                document.getElementById("sheet-url").style.display = "none";
+                renameInputForm();
+    
                 document.getElementById("data-insertion").style.display = "block";
                 formSubmit();
+            } else {
+                alert('Invalid Google Sheet link');
             }
-
-
-        } else {
-            alert('Invalid Google Sheet link');
+        });
+    
+        function isValidGoogleSheetLink(url) {
+            const regex = /^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9-_]+(\/.*)?$/;
+            return regex.test(url);
         }
     });
+}
 
-    function isValidGoogleSheetLink(url) {
-        const regex = /^https:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9-_]+(\/.*)?$/;
-        return regex.test(url);
-    }
-});
+
 
