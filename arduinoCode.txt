@@ -1,0 +1,83 @@
+#include <MD_Parola.h>
+#include <MD_MAX72xx.h>
+#include <SPI.h>
+#include <SoftwareSerial.h>
+
+#define HARDWARE_TYPE MD_MAX72XX::FC16_HW
+#define MAX_DEVICES 4
+#define CLK_PIN   13
+#define DATA_PIN  11
+#define CS_PIN    10
+#define scrollSpeed  70
+#define scrollPause  0  
+
+MD_Parola P = MD_Parola(HARDWARE_TYPE, CS_PIN, MAX_DEVICES);
+
+textEffect_t scrollEffect = PA_SCROLL_LEFT;
+textPosition_t scrollAlign = PA_LEFT;
+
+#define BUF_SIZE 75
+#define trigPin A0
+#define echoPin A1
+
+char testStr[BUF_SIZE] = { "" };
+String heightStr = "";
+long duration;
+int distance;
+int height;
+
+SoftwareSerial BTSerial(3, 4); // RX, TX
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600); // Debugging serial communication
+  BTSerial.begin(9600); // Bluetooth serial communication
+  P.begin();
+}
+
+void loop() {
+  measure();
+
+  if (distance > 80) {
+    P.displayText("HEIGHT", PA_LEFT, 0, 0, PA_PRINT, PA_NO_EFFECT);
+  } else {
+    height = 200 - distance;
+    heightStr = String(height) + "cm";
+    heightStr.toCharArray(testStr, BUF_SIZE);
+    P.displayText(testStr, PA_CENTER, 0, 0, PA_PRINT, PA_NO_EFFECT);
+  }
+  P.displayAnimate();
+
+  // Send height data over Bluetooth
+  // BTSerial.print("Height: ");
+  // BTSerial.print(height);
+  // BTSerial.println(" cm");
+
+  if(distance > 80) {
+    BTSerial.print("waiting..");
+  } else {
+    BTSerial.print(height);
+    BTSerial.print(" cm");
+  }
+
+  // Receive data from Bluetooth
+  if (BTSerial.available()) {
+    String btInput = BTSerial.readStringUntil('\n');
+    btInput.trim();
+    Serial.println("Received via Bluetooth: " + btInput); // Print to Serial Monitor
+  }
+
+  delay(100);
+}
+
+void measure() {
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.017;
+}

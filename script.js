@@ -40,7 +40,7 @@ function handleCharacteristicValueChanged(event) {
         const value = new TextDecoder().decode(event.target.value);
         height = value.trim();
         // document.getElementById('dataOutput').textContent = value.trim() + ' cm';
-        document.getElementById('data-received').textContent = value.trim();
+        document.getElementById('data-received').textContent = "Height: " + value.trim();
     } catch (error) {
         console.log('Error: ' + error);
         document.getElementById('statusOutput').textContent = 'Error processing data: ' + error;
@@ -71,7 +71,7 @@ function renameInputForm() {
 }
 
 function formSubmit() {
-    
+    // Ensure the form does not perform default submission
     document.getElementById("data-received").textContent = height;
     document.getElementById("form").addEventListener("submit", function(event) {
         event.preventDefault();
@@ -84,7 +84,7 @@ function formSubmit() {
             message.style.backgroundColor = "#979797";
             message.textContent = "Submitting...";
 
-            // post data as JSON
+            // Create customer data manually
             var customerData = {
                 sheetLink: document.getElementById("sheet-link").value,
                 date: new Date().toString(),
@@ -173,3 +173,9 @@ function testConnectionBluetooth() {
         return regex.test(url);
     }
 }
+
+// Call testConnectionBluetooth after the DOM content is loaded
+// document.addEventListener('DOMContentLoaded', function() {
+//     testConnectionBluetooth();
+// });
+

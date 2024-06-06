@@ -1,0 +1,28 @@
+function doPost(e) {
+  try {
+    const { postData: { contents } = {}, parameter: { sheetUrl } = {} } = e;
+    var data = parseFormData(contents);
+    appendToGoogleSheet(data, sheetUrl);
+    return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data appended successfully'})).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: error.message})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function parseFormData(postData) {
+  var data = {};
+  var parameters = postData.split('&');
+  for (var i = 0; i < parameters.length; i++) {
+    var keyValue = parameters[i].split('=');
+    data[keyValue[0]] = decodeURIComponent(keyValue[1]);
+  }
+  return data;
+}
+
+function appendToGoogleSheet(data, sheetUrl) {
+  var ss = SpreadsheetApp.openByUrl(sheetUrl);
+  var sheet = ss.getSheets()[0]; // Get the first sheet in the spreadsheet
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var rowData = headers.map(headerFld => data[headerFld] || '');
+  sheet.appendRow(rowData);
+}
